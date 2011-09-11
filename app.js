@@ -1,10 +1,12 @@
 var express = require('express'),
-	sio = require('socket.io');
+	io = require('socket.io');
 
 /*
  App
 */
 var app = express.createServer();
-app.configure(function() {
-	app.set('views', __dirname + '/public')
+app.configure(function(){
+	app.use(express.static(__dirname + '/public'));
 });
+app.listen(80);
+
