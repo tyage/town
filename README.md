@@ -10,7 +10,7 @@
 	<ul>
 		<li>Google Chrome</li>
 	</ul>
-	<p>Please use the latest browser!</p>
+	<p>Please use the latest version of the browser!</p>
 </section>
 
 <section>
