@@ -1,6 +1,6 @@
 <section>
 	<h2>About</h2>
-	<p>Just a game working on node.js.</p>
+	<p>Just a game working with node.js.</p>
 </section>
 
 <section>
