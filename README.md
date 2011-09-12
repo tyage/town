@@ -1,3 +1,5 @@
+<h1>TOWN</h1>
+
 <section>
 	<h2>About</h2>
 	<p>Just a game working with node.js.</p>
