@@ -1,7 +1,8 @@
-//var express = require('express'),
-//	sio = require('socket.io');
-var express = require('C:/Documents and Settings/admin/node_modules/express'),
-	sio = require('C:/Documents and Settings/admin/node_modules/socket.io');
+var express = require('express'),
+	sio = require('socket.io');
+// for windows
+//var express = require('C:/Documents and Settings/admin/node_modules/express'),
+//	sio = require('C:/Documents and Settings/admin/node_modules/socket.io');
 
 /*
  App
@@ -9,8 +10,9 @@ var express = require('C:/Documents and Settings/admin/node_modules/express'),
 var app = express.createServer();
 
 app.configure(function(){
-	//app.use(express.static(__dirname + '/public'));
-	app.use(express.static(__dirname + '\\public'));
+	app.use(express.static(__dirname + '/public'));
+	// for windows
+	//app.use(express.static(__dirname + '\\public'));
 });
 
 app.listen(80);
