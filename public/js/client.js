@@ -1,127 +1,117 @@
 $(function() {
 	/*
-		definition
+		Game
 	*/
-	var World = {
-		width: 500,
-		height: 300,
+	var Init = {};
+	var Users = [];
+	var Canvas = {
 		draw: function() {
-			World.ctx.clearRect(0, 0, World.width, World.height);
-			World.users.forEach(function(user) {
+			Canvas.ctx.clearRect(0, 0, Init.worldWidth, Init.worldHeight);
+			Users.forEach(function(user) {
 				if (!user) return true;
 				user.draw();
 			});
-			World.drawBlocks();
+			Canvas.drawBlocks();
 		},
-		blocks: [
-			[0,0,1,1,1,1,1],
-			[0,0,1,1,0,0,1],
-			[0,0,1,1,0,0,1],
-			[0,0,0,0,0,0,1],
-			[0,0,0,0,0,0,1],
-			[1,1,1,1,1,1,1],
-		],
-		blockHeight: 50,
-		blockWidth: 50,
 		drawBlocks: function() {
-			World.blocks.forEach(function(blocks, y) {
+			Init.blocks.forEach(function(blocks, y) {
 				blocks.forEach(function(block, x) {
 					if (!block) return true;
 					
-					World.ctx.fillRect(x * World.blockWidth, y * World.blockWidth, 
-						World.blockHeight, World.blockWidth);
+					Canvas.ctx.fillRect(x * Init.blockWidth, y * Init.blockWidth, 
+						Init.blockHeight, Init.blockWidth);
 				})
 			});
 		},
-		users: [],
-		userHeight: 50,
-		userWidth: 50,
 		ctx: $('#world').get(0).getContext('2d')
 	};
 	
 	var User = function(param) {
 		this.id = param.id;
 		this.pos = {
-			x: param.x,
-			y: param.y
+			x: param.pos.x,
+			y: param.pos.y
 		};
 		this.color = param.color;
 	};
-	User.prototype.move = function(x, y) {
-		var nextPos = {
-			x: x,
-			y: y
-		};
-
-		if (this.canMove(nextPos)) {
-			this.pos = nextPos;
+	User.prototype = {
+		draw: function() {
+			Canvas.ctx.fillRect(this.pos.x, this.pos.y, Init.userWidth, Init.userHeight);
+		},
+		move: function(pos) {
+			this.pos = pos;
 		}
-	};
-	User.prototype.canMove = function(pos) {
-		var minBlockPos = {
-			x: Math.floor(pos.x/World.blockWidth),
-			y: Math.floor(pos.y/World.blockHeight)
-		};
-		var maxBlockPos = {
-			x: Math.floor((pos.x + World.userWidth)/World.blockWidth),
-			y: Math.floor((pos.y + World.userHeight)/World.blockHeight)
-		};
-
-		for (var y=minBlockPos.y;y<=maxBlockPos.y;++y) {
-			for (var x=minBlockPos.x;x<=maxBlockPos.x;++x) {
-				if (World.blocks[y][x]) {
-					return false;
-				}
-			}
-		}
-		return true;
-	};
-	User.prototype.draw = function() {
-		World.ctx.fillRect(this.pos.x, this.pos.y, World.userWidth, World.userHeight);
 	};
 	
 	/*
 		Socket.IO
 	*/
 	var socket = io.connect();
-	socket.on('');
-	socket.on('users', function(userList) {
-		userList.forEach(function(user) {
+	
+	socket.on('init', function(init) {
+		Init = init;
+	});
+	socket.on('users', function(users) {
+		users.forEach(function(user) {
 			if (!user) return true;
 			
-			World.users[user.id] = new User(user);
+			Users[user.id] = new User(user);
 		});
-		World.draw();
+		Canvas.draw();
 	});
 	socket.on('in', function(user) {
-		World.users[user.id] = new User(user);
-		World.draw();
+		Users[user.id] = new User(user);
+		Canvas.draw();
 	});
 	socket.on('out', function(id) {
-		delete World.users[id];
-		World.draw();
+		delete Users[id];
+		Canvas.draw();
 	});
-
-	socket.on('move', function(id, x, y) {
-		World.users[id].move(x, y);
-		World.draw();
+	socket.on('move', function(id, pos) {
+		Users[id].move(pos);
+		Canvas.draw();
 	});
 	
 	/*
 		User controll
 	*/
-	var margin = 2;
-	$(window).keydown(function(e) {
+	(function() {
+		var keydown = {
+			37: false,
+			38: false,
+			39: false,
+			40: false
+		};
 		var key2move = {
 			37: [-1, 0],
 			38: [0, -1],
 			39: [1, 0],
 			40: [0, 1]
 		};
-		move = key2move[e.keyCode];
-		if (!move) return false;
+		var move = {x: 0, y: 0};
 		
-		socket.emit('move', move[0] * margin, move[1] * margin);
-	});
+		setInterval(function() {
+			if (move.x || move.y) {
+				socket.emit('move', move);
+			}
+		}, 40);
+		
+		$(window).keydown(function(e) {
+			key = e.keyCode;
+			if (!key2move[key] || keydown[key]) return;
+			
+			keydown[key] = true;
+			move.x += key2move[key][0];
+			move.y += key2move[key][1];
+		});
+		$(window).keyup(function(e) {
+			key = e.keyCode;
+			if (!key2move[key]) return;
+			
+			keydown[key] = false;
+			move.x -= key2move[key][0];
+			move.y -= key2move[key][1];
+		});
+	})();
 });
 
