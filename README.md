@@ -16,7 +16,7 @@
 <section>
 	<h2>Requirement</h2>
 	<ul>
-		<li>node.js >= v0.4.11</li>
+		<li>node.js >= v0.4.12</li>
 		<li>express >= v2.4.6</li>
 		<li>socket.io >= v0.8.4</li>
 	</ul>
